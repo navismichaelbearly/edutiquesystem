@@ -1,0 +1,63 @@
+<html>
+   <head> 
+      <title>Chart.js version 2 responsive doughnut with text inside</title> 
+      <meta name="viewport" content="width=device-width, initial-scale=1"> 
+      <!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.6/Chart.bundle.js"></script>--> 
+      <script type="text/javascript" src="canvasjs.js"></script>
+      <script type="text/javascript">
+    window.onload=function(){//from w w w. j  a v  a 2 s . co  m
+var data = {
+  labels: ["Completed","Incomplete","Unopened", "Overdue"],
+  datasets: [
+    {
+      data: [60, 5, 10, 25],
+      backgroundColor: ["#18ce67","#ffcc00", "#c2cfe0", "#ef7739"],
+    }]
+};
+Chart.pluginService.register({
+  beforeDraw: function(chart) {
+    var width = chart.chart.width,
+        height = chart.chart.height,
+        ctx = chart.chart.ctx,
+        type = chart.config.type;
+    if (type == 'doughnut')
+    {
+       var percent = Math.round((chart.config.data.datasets[0].data[0] * 100) /
+                    (chart.config.data.datasets[0].data[0] +
+                    chart.config.data.datasets[0].data[1]));
+         var oldFill = ctx.fillStyle;
+      var fontSize = ((height - chart.chartArea.top) / 100).toFixed(2);
+      ctx.restore();
+      ctx.font = fontSize + "em sans-serif";
+      ctx.textBaseline = "middle"
+      /*var text = percent + "%",*/
+	  var text = "60%",
+          textX = Math.round((width - ctx.measureText(text).width) / 2),
+          textY = (height + chart.chartArea.top) / 2;
+      ctx.fillStyle = chart.config.data.datasets[0].backgroundColor[0];
+      ctx.fillText(text, textX, textY);
+      ctx.fillStyle = oldFill;
+      ctx.save();
+    }
+  }
+});
+var myChart = new Chart(document.getElementById('myChart'), {
+  type: 'doughnut',
+  data: data,
+  options: {
+  rotation: 0,
+  cutoutPercentage: 85,
+     responsive: true,
+    legend: {
+      display: true
+    }
+  }
+});
+    }
+
+      </script> 
+   </head> 
+   <body> 
+      <canvas id="myChart"></canvas>  
+   </body>
+</html>
