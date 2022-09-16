@@ -19,7 +19,7 @@ if($_SESSION["utypeid"]== $admstdconst){
 }else if($_SESSION["utypeid"]== $admconst){
   $needHelp = "need-help-admin.php";
 }else if($_SESSION["utypeid"]== $admtchconst){
-  $needHelp = "";
+  $needHelp = "need-help.php";
 }
 
 /* Select Query to get FAQ Type */
@@ -102,18 +102,7 @@ $stmt->close();
 
             <div id="page-wrapper">
                 <div class="row">
-                        <div class="col-lg-12 searchbar">
-                            <div class="sidebar-search">
-                                <div class="input-group custom-search-form">
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-primary" type="button">
-                                            <i class="fa fa-search"></i>
-                                        </button>
-                                    </span>
-                                    <input type="text" class="form-control" placeholder="Global Search" style="border:none; box-shadow:none">                                    
-                                </div>
-                            </div>
-                        </div>
+                        <?php include 'inc/gsearch.php'; ?>
                         <!-- /.col-lg-12 -->
                 </div>
                 <div class="container-fluid">

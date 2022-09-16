@@ -85,18 +85,7 @@ include "inc/constants.php";
 
             <div id="page-wrapper" ><div id="testback"></div>
                 <div class="row">
-                        <div class="col-lg-12 searchbar toppad">
-                            <div class="sidebar-search">
-                                <div class="input-group custom-search-form">
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-primary" type="button">
-                                            <i class="fa fa-search"></i>
-                                        </button>
-                                    </span>
-                                    <input type="text" class="form-control" placeholder="Global Search" style="border:none; box-shadow:none">                                    
-                                </div>
-                            </div>
-                        </div>
+                        <?php include 'inc/gsearch.php'; ?>
                         <!-- /.col-lg-12 -->
                 </div>
                 <div class="container-fluid">
@@ -104,7 +93,8 @@ include "inc/constants.php";
                  
                     
 					     <div class="row">
-						 
+						 <br>
+                         <div class="col-lg-12" align="right"><input type="button" id="cancel" value="Back" class="btn btn-success" style="font-weight:bold"></div>
                         <div class="col-lg-9" >&nbsp;
 						    <div class="pageTitlenew">Edutique Tutorial Video </div>
 						    <div  class="normaltext">A short video tutorial to get you started with our platform</div>
@@ -117,6 +107,11 @@ include "inc/constants.php";
 							<div class="pageTitlenew">Frequently Asked Questions</div><br>
 					       
 					          <div class="row">
+                                   <?php if($_SESSION['utypeid'] == $admtchconst) {?>
+                                   <div class="col-lg-6"  >
+					                    <a href="educator-faq.php" class="btn btn-lg btn-success btn-block stptbuttontoppad">For Educators</a>
+                                   </div>
+                                   <?php } ?>
                                    <div class="col-lg-6"  >
 					                    <a href="student-faq.php" class="btn btn-lg btn-success btn-block stptbuttontoppad">For Students</a>
                                    </div>
@@ -132,7 +127,7 @@ include "inc/constants.php";
                                     <span id="messagetitle-info" class="info"></span><br>
                                     <textarea class="form-control" rows="3"  id="messagetext" name="messagetext" placeholder="Leave your question here and we will get back to you as soon as possible" ></textarea>
                                     <span id="messagetext-info" class="info"></span><br>
-                                    <a href="#" class="btn btn-default btn-xl" >View Message Log</a>
+                                    <a href="viewmessage.php" class="btn btn-default btn-xl" >View Message Log</a>
                                     <button class="btn btn-default btn-xl btnAlign" id="msgid">Send Message</button>
                                     
 							</form>
@@ -170,7 +165,24 @@ include "inc/constants.php";
         </div>
         <!-- /#wrapper -->
         
-        
+         <!-- Modal popup form for success -->
+                               <div class="modal fade" id="successAll" role="dialog" align="center">
+                                   <div class="modal-dialog" style="margin-top:150px;">
+                            
+                                      <!-- Modal content-->
+                                      <div class="modal-content1">
+                                         
+                                          <div class="modal-body1">
+                                              
+                                              <img src="images/tick-icon.png" width="100" height="100" style="width:100px; height:100px;">
+                                         </div>
+                                          <!--<div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                         </div>-->
+                                     </div>
+                              
+                                 </div>
+                              </div>
        
        
 
@@ -193,6 +205,10 @@ include "inc/constants.php";
         <script src='lib/main.js'></script>
 		<script>
 		$(document).ready(function () {
+		     $('#cancel').on('click', function(e){
+				e.preventDefault();
+				window.history.back();
+			    });
 			$("#messageId").on("submit", function () {
 			  $(".info").html("");
 			$("messagetext").removeClass("input-error");
@@ -215,8 +231,17 @@ include "inc/constants.php";
 						data: {messagetext:messagetext,messagetitle:messagetitle},
 						cache: false,
 						success: function(data){
-						   alert('Your message is sent successfully. Admin will get back to you within 72 hours');
-						   window.location='need-help.php';
+						   //alert('Your message is sent successfully. Admin will get back to you within 72 hours');
+						   $('#successAll').modal({
+										  backdrop: 'static',
+										  keyboard: true, 
+										 show: true
+					        });
+					        setTimeout(function() {$('#successAll').modal('hide');}, 2000);
+							setTimeout(function(){
+                                window.location='need-help.php';
+                             }, 2000);
+						   
 						   
 						}
 				  });event.preventDefault();

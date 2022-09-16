@@ -62,6 +62,7 @@ include "inc/constants.php";
         
         <link href='lib/main.css' rel='stylesheet' />
         <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap.min.css" rel="stylesheet" type="text/css">
+        <link href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css">
         <style> 
 		       select {
                       font-family: 'Poppins'!important;
@@ -97,18 +98,7 @@ include "inc/constants.php";
 
             <div id="page-wrapper" ><div id="testback"></div>
                 <div class="row">
-                        <div class="col-lg-12 searchbar toppad">
-                            <div class="sidebar-search">
-                                <div class="input-group custom-search-form">
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-primary" type="button">
-                                            <i class="fa fa-search"></i>
-                                        </button>
-                                    </span>
-                                    <input type="text" class="form-control" placeholder="Global Search" style="border:none; box-shadow:none">                                    
-                                </div>
-                            </div>
-                        </div>
+                        <?php include 'inc/gsearch.php'; ?>
                         <!-- /.col-lg-12 -->
                 </div>
                 <div class="container-fluid">
@@ -116,7 +106,8 @@ include "inc/constants.php";
                  
                     
 					 <div class="row">
-						 
+						 <br>
+                         <div class="col-lg-12" align="right"><input type="button" id="cancel" value="Back" class="btn btn-success" style="font-weight:bold"></div>
                         <div class="col-lg-9" >&nbsp;
 						    
 							<div class="pageTitlenew">Frequently Asked Questions</div><br>
@@ -150,9 +141,9 @@ include "inc/constants.php";
                                           <span> 
                                                <select id="selectMessagelog" name="selectCountry" class="selectheadback" >
                                                                 <!--<option value=" ">Country</option>-->                                                            
-                                                                <option  style="font:'Britannic Bold' !important"  value="All" >All</option>
-                                                                <option class="selectoptionback" value="Resolved">Resolved</option>
-                                                                <option class="selectoptionback" value="Unresolved">Unresolved</option>
+                                                                <option  style='font-family:Arial, Helvetica, sans-serif !important;'  value="All" >All</option>
+                                                                <option style='font-family:Arial, Helvetica, sans-serif !important;' value="Resolved">Resolved</option>
+                                                                <option style='font-family:Arial, Helvetica, sans-serif !important;' value="Unresolved">Unresolved</option>
                                               </select>
                                           </span>
                                       </div>
@@ -172,11 +163,11 @@ include "inc/constants.php";
                                       <div align="right">
                                           <span class='normaltext'>Show:</span>
                                           <span> 
-                                               <select id="selectTechsup" name="selectCountry" class="selectheadback">
+                                               <select id="selectTechsup" name="selectCountry" class="selectheadback" >
                                                                 <!--<option value=" ">Country</option>-->                                                            
-                                                                <option class="selectoptionback" value="All">All</option>
-                                                                <option class="selectoptionback" value="Resolved">Resolved</option>
-                                                                <option class="selectoptionback" value="Unresolved">Unresolved</option>
+                                                                <option style='font-family:Arial, Helvetica, sans-serif !important;' value="All">All</option>
+                                                                <option style='font-family:Arial, Helvetica, sans-serif !important;' value="Resolved">Resolved</option>
+                                                                <option style='font-family:Arial, Helvetica, sans-serif !important;' value="Unresolved">Unresolved</option>
                                               </select>
                                           </span>
                                       </div>
@@ -199,7 +190,24 @@ include "inc/constants.php";
         </div>
         <!-- /#wrapper -->
         
-        
+        <!-- Modal popup form for success -->
+                               <div class="modal fade" id="successAll" role="dialog" align="center">
+                                   <div class="modal-dialog" style="margin-top:150px;">
+                            
+                                      <!-- Modal content-->
+                                      <div class="modal-content1">
+                                         
+                                          <div class="modal-body1">
+                                              
+                                              <img src="images/tick-icon.png" width="100" height="100" style="width:100px; height:100px;">
+                                         </div>
+                                          <!--<div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                         </div>-->
+                                     </div>
+                              
+                                 </div>
+                              </div>
        
        
 
@@ -222,8 +230,13 @@ include "inc/constants.php";
         <script src='lib/main.js'></script>
         <script src=" https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap.min.js"></script>
+        <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
 		<script>
 		$(document).ready(function () {
+		           $('#cancel').on('click', function(e){
+				e.preventDefault();
+				window.history.back();
+			    });
                   $(window).on('load', function() { // onload jQuery Ajax Calls in PHP Script
 						var messagelog = 'messagelog';
 						var mesageVal ='All';
@@ -235,12 +248,59 @@ include "inc/constants.php";
 								cache: false,
 								success: function(data){
 								   $("#dataMessagelog").html(data);
-								   $('#example').dataTable({
+								    $('#example').dataTable({
 										"bPaginate": true,
 										"bLengthChange": false,
 										"bFilter": false,
 										"bInfo": true,
-										"bAutoWidth": false 
+										"bAutoWidth": false,
+										"dom": 'Bfrtip',
+										"buttons": [
+											{
+												text: 'Delete',
+											    attr: {
+												id: 'delete_records',
+												class: 'btn btn-success'
+											   },
+											   action: function ( e, dt, node, config ) {
+													var reviews = [];
+													$(".rev_checkbox:checked").each(function() {
+														reviews.push($(this).data('rev-id'));
+													});
+													if(reviews.length <=0) {
+														alert("Please select records."); 
+													} 
+													else {  
+														WRN_PROFILE_DELETE = "Are you sure you want to delete "+(reviews.length>1?"these":"this")+" row?";
+														var checked = confirm(WRN_PROFILE_DELETE);
+														if(checked == true) {
+															var selected_values = reviews.join(",");
+															$.ajax({
+																type: "POST",
+																url: "data/deleteAllrecords.php",
+																cache:false,
+																data: 'idMesslog='+selected_values,
+																success: function(response) { 
+																	$('#successAll').modal({
+																			  backdrop: 'static',
+																			  keyboard: true, 
+																			 show: true
+																		});
+																		setTimeout(function() {$('#successAll').modal('hide');}, 2000);
+																	   setTimeout(function() {
+																			 window.location = 'need-help-admin.php';
+																		  }, 2000);
+																	var ids = response.split(",");
+																	for (var i=0; i < ids.length; i++ ) {	
+																		$("#"+ids[i]).remove(); 
+																	}	
+																} 
+															});
+														} 
+													}
+												}
+											}
+										]   
 								  });
 								}
 					 });
@@ -260,7 +320,54 @@ include "inc/constants.php";
 										"bLengthChange": false,
 										"bFilter": false,
 										"bInfo": true,
-										"bAutoWidth": false 
+										"bAutoWidth": false,
+										"dom": 'Bfrtip',
+										"buttons": [
+											{
+												text: 'Delete',
+											    attr: {
+												id: 'delete_recordstech',
+												class: 'btn btn-success'
+											   },
+											   action: function ( e, dt, node, config ) {
+													var reviewstech = [];
+													$(".rev_checkboxtech:checked").each(function() {
+														reviewstech.push($(this).data('rev-idtech'));
+													});
+													if(reviewstech.length <=0) {
+														alert("Please select records."); 
+													} 
+													else {  
+														WRN_PROFILE_DELETE = "Are you sure you want to delete "+(reviewstech.length>1?"these":"this")+" row?";
+														var checkedtech = confirm(WRN_PROFILE_DELETE);
+														if(checkedtech == true) {
+															var selected_valuestech = reviewstech.join(",");
+															$.ajax({
+																type: "POST",
+																url: "data/deleteAllrecords.php",
+																cache:false,
+																data: 'idMesslogtech='+selected_valuestech,
+																success: function(response) { 
+																	$('#successAll').modal({
+																			  backdrop: 'static',
+																			  keyboard: true, 
+																			 show: true
+																		});
+																		setTimeout(function() {$('#successAll').modal('hide');}, 2000);
+																	   setTimeout(function() {
+																			 window.location = 'need-help-admin.php';
+																		  }, 2000);
+																	var idstech = response.split(",");
+																	for (var i=0; i < idstech.length; i++ ) {	
+																		$("#"+idstech[i]).remove(); 
+																	}	
+																} 
+															});
+														} 
+													}
+												}
+											}
+										]    
 								  });
 								}
 					 });
@@ -283,7 +390,54 @@ include "inc/constants.php";
 										"bLengthChange": false,
 										"bFilter": false,
 										"bInfo": true,
-										"bAutoWidth": false 
+										"bAutoWidth": false,
+										"dom": 'Bfrtip',
+										"buttons": [
+											{
+												text: 'Delete',
+											    attr: {
+												id: 'delete_records',
+												class: 'btn btn-success'
+											   },
+											   action: function ( e, dt, node, config ) {
+													var reviews = [];
+													$(".rev_checkbox:checked").each(function() {
+														reviews.push($(this).data('rev-id'));
+													});
+													if(reviews.length <=0) {
+														alert("Please select records."); 
+													} 
+													else {  
+														WRN_PROFILE_DELETE = "Are you sure you want to delete "+(reviews.length>1?"these":"this")+" row?";
+														var checked = confirm(WRN_PROFILE_DELETE);
+														if(checked == true) {
+															var selected_values = reviews.join(",");
+															$.ajax({
+																type: "POST",
+																url: "data/deleteAllrecords.php",
+																cache:false,
+																data: 'idMesslog='+selected_values,
+																success: function(response) { 
+																	$('#successAll').modal({
+																			  backdrop: 'static',
+																			  keyboard: true, 
+																			 show: true
+																		});
+																		setTimeout(function() {$('#successAll').modal('hide');}, 2000);
+																	   setTimeout(function() {
+																			 window.location = 'need-help-admin.php';
+																		  }, 2000);
+																	var ids = response.split(",");
+																	for (var i=0; i < ids.length; i++ ) {	
+																		$("#"+ids[i]).remove(); 
+																	}	
+																} 
+															});
+														} 
+													}
+												}
+											}
+										]     
 								  });
 								}
 					 });
@@ -305,7 +459,54 @@ include "inc/constants.php";
 										"bLengthChange": false,
 										"bFilter": false,
 										"bInfo": true,
-										"bAutoWidth": false 
+										"bAutoWidth": false,
+										"dom": 'Bfrtip',
+										"buttons": [
+											{
+												text: 'Delete',
+											    attr: {
+												id: 'delete_recordstech',
+												class: 'btn btn-success'
+											   },
+											   action: function ( e, dt, node, config ) {
+													var reviewstech = [];
+													$(".rev_checkboxtech:checked").each(function() {
+														reviewstech.push($(this).data('rev-idtech'));
+													});
+													if(reviewstech.length <=0) {
+														alert("Please select records."); 
+													} 
+													else {  
+														WRN_PROFILE_DELETE = "Are you sure you want to delete "+(reviewstech.length>1?"these":"this")+" row?";
+														var checkedtech = confirm(WRN_PROFILE_DELETE);
+														if(checkedtech == true) {
+															var selected_valuestech = reviewstech.join(",");
+															$.ajax({
+																type: "POST",
+																url: "data/deleteAllrecords.php",
+																cache:false,
+																data: 'idMesslogtech='+selected_valuestech,
+																success: function(response) { 
+																	$('#successAll').modal({
+																			  backdrop: 'static',
+																			  keyboard: true, 
+																			 show: true
+																		});
+																		setTimeout(function() {$('#successAll').modal('hide');}, 2000);
+																	   setTimeout(function() {
+																			 window.location = 'need-help-admin.php';
+																		  }, 2000);
+																	var idstech = response.split(",");
+																	for (var i=0; i < idstech.length; i++ ) {	
+																		$("#"+idstech[i]).remove(); 
+																	}	
+																} 
+															});
+														} 
+													}
+												}
+											}
+										]    
 								  });
 								}
 					 });
@@ -340,6 +541,32 @@ include "inc/constants.php";
 								}
 					 });
                    });
+				   
+				   $(document).on('click', '#select_all', function() {
+						$(".rev_checkbox").prop("checked", this.checked);
+						$("#select_count").html($("input.rev_checkbox:checked").length+" Selected");
+					});
+					$(document).on('click', '.rev_checkbox', function() {
+						if ($('.rev_checkbox:checked').length == $('.rev_checkbox').length) {
+						$('#select_all').prop('checked', true);
+						} else {
+						$('#select_all').prop('checked', false);
+						}
+						$("#select_count").html($("input.rev_checkbox:checked").length+" Selected");
+					}); 
+					
+					$(document).on('click', '#select_alltech', function() {
+						$(".rev_checkboxtech").prop("checked", this.checked);
+						$("#select_counttech").html($("input.rev_checkboxtech:checked").length+" Selected");
+					});
+					$(document).on('click', '.rev_checkboxtech', function() {
+						if ($('.rev_checkboxtech:checked').length == $('.rev_checkboxtech').length) {
+						$('#select_alltech').prop('checked', true);
+						} else {
+						$('#select_alltech').prop('checked', false);
+						}
+						$("#select_counttech").html($("input.rev_checkboxtech:checked").length+" Selected");
+					}); 
 			  
 		});
 		</script>

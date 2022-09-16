@@ -39,10 +39,10 @@ if($_POST['schoolNames'] != '')
 		$stmt->bind_result($level_id, $level);
 		$sr =1;
 		/* fetch values */
-		echo " <option>Select Level</option>";
+		echo " <option style='font-family:Arial, Helvetica, sans-serif !important;'>Select Level</option>";
 		while ($stmt->fetch()) {
 																
-			echo " <option  value='".$level_id."'>".$level."</option>";
+			echo " <option style='font-family:Arial, Helvetica, sans-serif !important;' value='".$level_id."'>".$level."</option>";
 		}
 	}	
 }

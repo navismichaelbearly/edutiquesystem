@@ -103,14 +103,15 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 	            $param_user_id1 = $user_id;
 	            $stmt3->execute();
 				$_SESSION['login_details_id']=$stmt3->insert_id; 
-				
+				if($utypeid !=6){
 				$stmt4 = $mysqli->prepare("SELECT school_id FROM edu_user_school_level_class where user_id=?");
 	            $stmt4->bind_param("s", $param_user_id2);
 	            $param_user_id2 = $user_id;
 	            $stmt4->execute(); 
 				$stmt4->bind_result($school_id);
 				$stmt4->fetch();
-				$_SESSION['school_id']=$school_id;          
+				$_SESSION['school_id']=$school_id;  
+				}        
                 // Redirect user to welcome page
 				header("location: dashboard.php");
                } 

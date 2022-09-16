@@ -17,7 +17,7 @@ include "inc/constants.php";
 /* Initialise PHP variables */
 $new_password= $confirm_password ="";
 $new_password_err = $confirm_password_err = "";
-
+$ovrallCompleted3=$ovrallIncomplete3=$ovrallUnopened3=$ovrallOverdue3=0;
 /* Select Query to get first time password change variable */
 $stmt = $mysqli->prepare("SELECT first_time_password_change, tooltip FROM  edu_users  WHERE user_id = ? and user_status = ?");
 /* Bind parameters */
@@ -29,7 +29,81 @@ $stmt->execute();
 $stmt->bind_result($first_time_password_change, $tooltip);
 $stmt->fetch();
 $stmt->close();
+
+if($_SESSION["utypeid"] == $admstdconst) {
+	//-----------------------for over all progress chat------------------------------
+	$stmt = $mysqli->prepare("SELECT COUNT(b.task_id) AS taskid, a.activity_id FROM edu_task a inner join edu_user_task b on a.task_id=b.task_id WHERE b.assigned_to = ? ");
+	/* Bind parameters */
+	$stmt->bind_param("s", $param_assigned_to);
+	/* Set parameters */
+	$param_assigned_to = $_SESSION["id"];
+	$param_activity_id = 0;
+	$stmt->execute();
+	$stmt->bind_result($ovrallTot, $act_idcheck3);
+	$stmt->fetch();
+	$stmt->close();
+	if($ovrallTot !=0){
+	$stmt = $mysqli->prepare("SELECT COUNT(task_id) AS taskid FROM  edu_user_task  WHERE assigned_to = ? and task_stages=?");
+	/* Bind parameters */
+	$stmt->bind_param("ss", $param_assigned_to,$param_task_stages);
+	/* Set parameters */
+	$param_assigned_to = $_SESSION["id"];
+	$param_activity_id = 0;
+	$param_task_stages =$completed;
+	$stmt->execute();
+	$stmt->bind_result($ovrallCompleted);
+	$stmt->fetch();
+	$stmt->close();	
+	$ovrallCompleted1 = $ovrallCompleted / $ovrallTot;
+	$ovrallCompleted2 = $ovrallCompleted1 * 100;
+	$ovrallCompleted3 = number_format($ovrallCompleted2, 0);
 	
+	$stmt = $mysqli->prepare("SELECT COUNT(task_id) AS taskid FROM  edu_user_task  WHERE assigned_to = ? and task_stages=?");
+	/* Bind parameters */
+	$stmt->bind_param("ss", $param_assigned_to,$param_task_stages);
+	/* Set parameters */
+	$param_assigned_to = $_SESSION["id"];
+	$param_activity_id = 0;
+	$param_task_stages =$incomplete;
+	$stmt->execute();
+	$stmt->bind_result($ovrallIncomplete);
+	$stmt->fetch();
+	$stmt->close();
+	$ovrallIncomplete1 = $ovrallIncomplete / $ovrallTot;
+	$ovrallIncomplete2 = $ovrallIncomplete1 * 100;
+	$ovrallIncomplete3 = number_format($ovrallIncomplete2, 0);	 
+	
+	$stmt = $mysqli->prepare("SELECT COUNT(task_id) AS taskid FROM  edu_user_task  WHERE assigned_to = ? and task_stages=?");
+	/* Bind parameters */
+	$stmt->bind_param("ss", $param_assigned_to,$param_task_stages);
+	/* Set parameters */
+	$param_assigned_to = $_SESSION["id"];
+	$param_activity_id = 0;
+	$param_task_stages =$overdue;
+	$stmt->execute();
+	$stmt->bind_result($ovrallOverdue);
+	$stmt->fetch();
+	$stmt->close();
+	$ovrallOverdue1 = $ovrallOverdue / $ovrallTot;
+	$ovrallOverdue2 = $ovrallOverdue1 * 100;
+	$ovrallOverdue3 = number_format($ovrallOverdue2, 0);
+	
+	$stmt = $mysqli->prepare("SELECT COUNT(task_id) AS taskid FROM  edu_user_task  WHERE assigned_to = ? and task_stages=?");
+	/* Bind parameters */
+	$stmt->bind_param("ss", $param_assigned_to,$param_task_stages);
+	/* Set parameters */
+	$param_assigned_to = $_SESSION["id"];
+	$param_activity_id = 0;
+	$param_task_stages =$unopened;
+	$stmt->execute();
+	$stmt->bind_result($ovrallUnopened);
+	$stmt->fetch();
+	$stmt->close(); 
+	$ovrallUnopened1 = $ovrallUnopened / $ovrallTot;
+	$ovrallUnopened2 = $ovrallUnopened1 * 100;
+	$ovrallUnopened3 = number_format($ovrallUnopened2, 0);
+	}	
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -74,7 +148,37 @@ $stmt->close();
         <![endif]-->
         
         <link href='lib/main.css' rel='stylesheet' />
-        
+        <link href="https://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+
+    	<link rel="stylesheet" type="text/css" href="css/pb.calendar.css">
+        <style>
+		       .contact-info{
+					text-align: center;
+					font-size: 12px;
+					color: gray;
+				}
+		      .pb-calendar .schedule-dot-item.yellow{
+					background-color: #ffcc00;
+				}
+		
+				.pb-calendar .schedule-dot-item.orange{
+					background-color: #ef7739;
+				}
+		
+				.pb-calendar .schedule-dot-item.green{
+					background-color: #18ce67;
+				}
+				#div_top_hypers {
+					background-color:#eeeeee;
+					display:inline;      
+				}
+				#ul_top_hypers li{
+					display: inline;
+				}
+				<?php if($tooltip == 0) {?>
+				.tooltipcls { pointer-events: none; } 
+				<?php }?>
+		</style>
     </head>
     <body oncontextmenu="return false;" >
 
@@ -98,24 +202,13 @@ $stmt->close();
 
             <div id="page-wrapper" ><div id="testback"></div>
                 <div class="row">
-                        <div class="col-lg-12 searchbar toppad">
-                            <div class="sidebar-search">
-                                <div class="input-group custom-search-form">
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-primary" type="button">
-                                            <i class="fa fa-search"></i>
-                                        </button>
-                                    </span>
-                                    <input type="text" class="form-control" placeholder="Global Search" style="border:none; box-shadow:none">                                    
-                                </div>
-                            </div>
-                        </div>
+                        <?php include 'inc/gsearch.php'; ?>
                         <!-- /.col-lg-12 -->
                 </div>
                 <div class="container-fluid">
                      <div class="row">
                         <div class="col-lg-12">
-                            <h3 class="page-header" style="color:#3F3A60">Welcome back, <?php echo $_SESSION["fname"];?>! </h3>
+                            <h3 class="page-header" style="color:#3F3A60;e">Welcome back, <?php echo $_SESSION["fname"];?>! </h3>
                         </div>
                         <!-- /.col-lg-12 -->
                     </div>
@@ -127,7 +220,7 @@ $stmt->close();
                                      Announcements/Notifications
                                     <div class="pull-right">
                                         <div class="btn-group">
-                                            
+                                            <?php if($_SESSION["utypeid"]==$admtchconst  || $_SESSION["utypeid"]==$admprogtchconst ){?><a href="add-announcement.php" class="btn btn-default btn-xs">New Announcement</a><?php }else if($_SESSION["utypeid"]==$admconst){?><a href="add-announcement-admin.php" class="btn btn-default btn-xs">New Announcement</a><?php }?>
                                         </div>
                                     </div>
                                 </div>
@@ -156,7 +249,14 @@ $stmt->close();
                                 <div class="panel-body">
                                     <!-- display data from Ajax call -->
                                     <div id="dataTableshow1"></div>
-                                    <div align="center"><a href="question-portal-list.php" style="color:#0F96E8">view more</a></div>
+                                    <?php
+									   if($_SESSION["utypeid"]==$admtchconst || $_SESSION["utypeid"]== $admprogtchconst  || $_SESSION["utypeid"]== $admconst){
+									      $qplink = "question-portal-all.php";
+									   }elseif($_SESSION["utypeid"]==$admstdconst){
+									      $qplink = "question-portal-list.php";
+									   }
+									?>
+                                    <div align="center"><a href="<?php echo $qplink;?>" style="color:#0F96E8">view more</a></div>
                                 </div>
                                 <!-- /.panel-body -->
                             </div>
@@ -171,7 +271,13 @@ $stmt->close();
                                 </div>-->
                                 <!-- /.panel-heading -->
                                 <div class="panel-body">
-                                    <div id="element"></div>
+                                    <!--<div id="element"></div>-->
+                                    <?php if($_SESSION["utypeid"]== $admconst){
+									    $calLink ="main-calendar-admin.php?studId=0";
+									}else{
+									    $calLink ="mainCalendar.php";
+									}?>
+                                    <a href="<?php echo $calLink;?>" style="text-decoration:none"><div id="pb-calendar" class="pb-calendar"></div></a>
                                     <!--<div id='calendar'></div>-->
 									
                                     
@@ -182,12 +288,30 @@ $stmt->close();
                             <div class="panel panel-default">
                                 <div class="panel-heading">
 								    <!-- check which user is logged in and show content appropriately -->
-                                    <?php if($_SESSION["utypeid"]==$admconst){ echo " Message Log"; } elseif($_SESSION["utypeid"]==$admstdconst){ echo "Overall Progress";} ?>
+                                    <?php if($_SESSION["utypeid"]==$admconst){ echo " Message Log"; } elseif($_SESSION["utypeid"]==$admstdconst){ echo "Overall Progress";} elseif($_SESSION["utypeid"]==$admtchconst){ echo "My Classes";}?>
                                 </div>
                                 <div class="panel-body">
-                                <?php if($_SESSION["utypeid"]==$admconst){  } elseif($_SESSION["utypeid"]==$admstdconst){  ?>
-                                         <canvas id="myChart" width="270" height="270"></canvas>
-                                <?php   } ?> 
+                                <?php if($_SESSION["utypeid"]==$admconst){ ?> 
+								     <div id="messageinfo"></div>
+                                     <div align="center"><a href="need-help-admin.php" style="color:#0F96E8">view more</a></div>
+								<?php } elseif($_SESSION["utypeid"]==$admstdconst){  ?>
+                                         <canvas id="overallChart" width="270" height="270"></canvas>
+                                         <div id="div_top_hypers">
+                                         <?php if($ovrallTot !=0){ ?>
+                                            <ul id="ul_top_hypers">
+                                               <li style="list-style:none"><span style="font-size:50px; color:#18ce67; display:inline-block" >.</span> Completed</li>
+                                              <li style="list-style:none"><span style="font-size:50px; color:#ffcc00;display:inline-block" >.</span> Incomplete</li><br>
+                                              <li style="list-style:none"><span style="font-size:50px; color:#c2cfe0" >.</span> Unopened</li>
+                                              <li style="list-style:none"><span style="font-size:50px; color:#ef7739" >.</span> Overdue</li>
+                                            </ul>
+										<?php } ?>
+                                        </div> 
+                                <?php   } elseif($_SESSION["utypeid"]==$admtchconst || $_SESSION["utypeid"]== $admprogtchconst){ ?>
+                                        <!--<div id="myClassesdata"></div>-->
+                                        <div id="classinfo"></div>
+                                        <div align="center"><a href="my_classes.php" style="color:#0F96E8">view more</a></div>
+                                        
+                                <?php }?>
                                     
                                 </div>
                                 <!-- /.panel-body -->
@@ -250,6 +374,24 @@ $stmt->close();
       
          </div>
       </div>
+       <!-- Modal popup form for success -->
+                               <div class="modal fade" id="successAll" role="dialog" align="center">
+                                   <div class="modal-dialog" style="margin-top:150px;">
+                            
+                                      <!-- Modal content-->
+                                      <div class="modal-content1">
+                                         
+                                          <div class="modal-body1">
+                                              
+                                              <img src="images/tick-icon.png" width="100" height="100" style="width:100px; height:100px;">
+                                         </div>
+                                          <!--<div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                         </div>-->
+                                     </div>
+                              
+                                 </div>
+                              </div>
 
 		<!-- jQuery -->
 		<script src="js/jquery.min.js"></script>
@@ -269,7 +411,80 @@ $stmt->close();
 		<script src="js/startmin.js"></script>
         <script src='lib/main.js'></script>
 		<script>
+		function showLevelClass(e) {
+      var id = event.target.getAttribute("data-id");
+      $.ajax({
+        type: 'POST',
+        url: 'data/taskAssignClassLevel.php',
+        data: {
+          classlevelid: id
+        },
+        cache: false,
+        success: function(data) {
+          var html = '';
+          var size = 0;
+          $(".levelclasslist_" + id.toString()).html(data);
+        }
+      });
+    }
+    function levelCheckBoxAll(e) { 
+      let parentEle = document.getElementById("checkAllitem_" + e.value);
+      var ele = parentEle.getElementsByTagName('input');
+      let eleCount = 1;
+      let eleLegth = ele.length;
+      let switchs;
+      if (parentEle.getAttribute('name') == 'Check All') {
+        switchs = true;
+        parentEle.setAttribute('name', 'Uncheck All');
+        //$('#div_wrap'+e.value).removeClass('hide');
+      } else {
+        switchs = false;
+        parentEle.setAttribute('name', 'Check All');
+        //$('#div_wrap'+e.value).addClass('hide');
+      }
+      for (let i = 0; i < ele.length; i++) {
+        ele[i].checked = switchs
+      }
+    }
+    /*$(document).delegate('#allArticalCheck','change',function(e){ */
+    $('#allArticalCheck').change(function(){
+      var isChecked = $(this).prop("checked");
+      console.log(isChecked);
+        $('.allArticalActivity').each(function() { 
+          this.checked = isChecked; 
+        }); 
+    });
+    $(document).delegate('.sectionDisplay','click',function(e){ 
+        let id = $(this).attr('id');
+        if($('#div_wrap'+id).hasClass('hide')){
+          $('#div_wrap'+id).removeClass('hide'); 
+        }else{
+          $('#div_wrap'+id).addClass('hide'); 
+        }
+    });
+    $(document).delegate('.studentcheck','click',function(e){ 
+        var checked = $(this).prop("checked");
+          $(this).attr("checked",false);
+        if(checked){
+          $(this).attr("checked",true);
+        }
+    });
 		$(document).ready(function () {
+		     //teachers classes
+			$(window).on('load', function() { // onload jQuery Ajax Calls in PHP Script
+						var userId = '<?php echo $_SESSION["id"];?>';
+					    var myClasses = 1;
+					   $.ajax({
+								type: 'POST',
+								url: 'data/selectMyclasseslist.php',
+								data: {userId:userId,myClasses:myClasses},
+								cache: false,
+								success: function(data){
+								   $("#myClassesdata").html(data);
+								  
+								}
+					});
+			});	
 		     $(window).on('load', function() { // onload jQuery Ajax Calls in PHP Script
 						var userId = '<?php echo $_SESSION["id"];?>';
 					    var totPages = 2;
@@ -302,6 +517,8 @@ $stmt->close();
 				          }
 			      });
 		    });	
+			
+				
 			// display popup on page load
 			var wrapperVar = document.getElementById("wrapper");
 			<?php if($first_time_password_change ==0){?>
@@ -321,16 +538,17 @@ $stmt->close();
 				         // $('#testsidemenu').setAttribute("aria-expanded","true");
 						 //$('.tooltipcls').attr('data-html', true);
                          //$('.tooltipcls').attr('data-placement', "bottom");
-						  $(window).on("load", function(){
+						  /*$(window).on("load", function(){
                                $('[data-toggle="tooltip"]').tooltip().mouseover();   
-                          });
+                          });*/
 					      var mainelement = document.getElementById("testback");
 					      mainelement.classList.add("darkback");
 					      $('body').css('overflow', 'hidden');
 					      document.getElementById("page-wrapper").classList.add("darkback2");
 					   }
 			           $(window).on("load", function(){
-                               $('[data-toggle="tooltip"]').tooltip().mouseover();   
+                               $('[data-toggle="tooltip"]').tooltip().mouseover(); 
+							   $('.tooltipcls').bind('click', true);  
                        });
 					   var mainelement = document.getElementById("testback");
 					   mainelement.classList.add("darkback");
@@ -338,9 +556,9 @@ $stmt->close();
 					   document.getElementById("page-wrapper").classList.add("darkback2");
 					   //wrapperVar.classList.add("wrappervar");
 					 
-					   $(".tooltipcls, .tooltip").mouseleave(function(){
+					   /*$(".tooltipcls, .tooltip").mouseleave(function(){
 							$('[data-toggle="tooltip"]').tooltip().mouseover();
-					   });
+					   });*/
   
 					   $('body').on('click', function (e) {
                                $('[data-toggle="tooltip"]').each(function () {
@@ -422,8 +640,16 @@ $stmt->close();
 				data: {confirm_password:confirm_password},
 				cache: false,
 				success: function(data){
-				   alert('Password has been updated successfully');
-				   window.location='dashboard.php';
+				   $('#successAll').modal({
+										  backdrop: 'static',
+										  keyboard: true, 
+										 show: true
+					        });
+					        setTimeout(function() {$('#successAll').modal('hide');}, 2000);
+							setTimeout(function(){
+                                 window.location = 'dashboard.php';
+                             }, 2000);
+				   //window.location='dashboard.php';
 				   
 				}
 			 });event.preventDefault();
@@ -431,6 +657,18 @@ $stmt->close();
 			}
 			
 		  });
+		  
+		  /* $('#globalSearch').on('click', function () {  
+					 var gsearch = $("#gsearch").val();
+				     var gsearchval = 1;
+				     $.ajax({
+					     type: 'POST',
+					     url: 'search.php',
+					     data: {gsearch:gsearch,gsearchval:gsearchval},
+					     cache: false
+					     
+				     });
+		  });*/
 		});
 		</script>
 		<!-- Essential JS 2 Calendar's dependent scripts -->
@@ -446,54 +684,48 @@ $stmt->close();
         // display chart in donut format - progress report		
 		window.onload=function(){//from w w w. j  a v  a 2 s . co  m
 			   var data = {
-						   labels: ["Completed","Incomplete","Unopened", "Overdue"],
-						   datasets: [
-								  {
-								   data: [60, 5, 10, 25],
-								   backgroundColor: ["#18ce67","#ffcc00", "#c2cfe0", "#ef7739"],
-								  }]
-			   };
-			   Chart.pluginService.register({
-					 beforeDraw: function(chart) {
-						var width = chart.chart.width,
+					labels: ["Completed","Incomplete","Unopened", "Overdue"],
+					url: ["Completed.com","Incomplete","Unopened", "Overdue"],
+					datasets: [{
+						data: [<?php echo $ovrallCompleted3;?>, <?php echo $ovrallIncomplete3;?>, <?php echo $ovrallUnopened3;?>, <?php echo $ovrallOverdue3;?>],
+						backgroundColor: ["#18ce67","#ffcc00", "#c2cfe0", "#ef7739"]
+					}]
+				};
+			
+			var promisedDeliveryChart = new Chart(document.getElementById('overallChart'), {
+			  type: 'doughnut',
+			  data: data,
+			  options: {
+				elements: {
+					center: {
+						text: '<?php echo(max($ovrallCompleted3,$ovrallIncomplete3,$ovrallUnopened3,$ovrallOverdue3)); ?>%'  //set as you wish
+					}
+				},
+				cutoutPercentage: 75,
+				legend: {
+					display: false
+				}
+			}
+			});						
+				
+			Chart.pluginService.register({
+				beforeDraw: function (chart) {
+					var width = chart.chart.width,
 						height = chart.chart.height,
-						ctx = chart.chart.ctx,
-						type = chart.config.type;
-						if (type == 'doughnut')
-						{
-						  var percent = Math.round((chart.config.data.datasets[0].data[0] * 100) /
-						 (chart.config.data.datasets[0].data[0] +
-						 chart.config.data.datasets[0].data[1]));
-						 var oldFill = ctx.fillStyle;
-						 var fontSize = ((height - chart.chartArea.top) / 100).toFixed(2);
-						 ctx.restore();
-						 ctx.font = fontSize + "em sans-serif";
-						 ctx.textBaseline = "middle"
-						 /*var text = percent + "%",*/
-						 var text = "60%",
-						 textX = Math.round((width - ctx.measureText(text).width) / 2),
-						 textY = (height + chart.chartArea.top) / 2;
-						 ctx.fillStyle = chart.config.data.datasets[0].backgroundColor[0];
-						 ctx.fillText(text, textX, textY);
-						 ctx.fillStyle = oldFill;
-						 ctx.save();
-					   }
-				   }
-			  });
-				   
-			  var myChart = new Chart(document.getElementById('myChart'), {
-				  type: 'doughnut',
-				  data: data,
-				  options: {
-							 rotation: 0,
-							 cutoutPercentage: 85,
-							 responsive: true,
-							 legend: {
-									  display: true,
-									  position: 'bottom'
-									 }
-						   }
-			 });
+						ctx = chart.chart.ctx;
+					ctx.restore();
+					var fontSize = (height / 114).toFixed(2);
+					ctx.font = fontSize + "em sans-serif";
+					ctx.textBaseline = "middle";
+					ctx.textColor = "red";
+					var text = chart.config.options.elements.center.text,
+						textX = Math.round((width - ctx.measureText(text).width) / 2),
+						textY = height / 2;
+					ctx.fillStyle = 'rgba(24, 206, 103, 1)';
+					ctx.fillText(text, textX, textY);
+					ctx.save();
+				}
+			});	
 		}
 		
 		 document.addEventListener('DOMContentLoaded', function() {
@@ -570,6 +802,106 @@ $stmt->close();
 			calendar.render();
 		  });
 		</script> 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.1/moment.min.js" integrity="sha384-F13mJAeqdsVJS5kJv7MZ4PzYmJ+yXXZkt/gEnamJGTXZFzYgAcVtNg5wBDrRgLg9" crossorigin="anonymous"></script>
+<script type="text/javascript" src="js/pb.calendar.js"></script>
+
+<script type="text/javascript">
+jQuery(document).ready(function(){
+
+	//var current_yyyymm_ = moment().format("YYYYMM");
+
+	$("#pb-calendar").pb_calendar({
+		schedule_list : function(callback_, yyyymm_){
+			var temp_schedule_list_ = {};
+
+<?php 
+
+
+  if ($stmt = $mysqli->prepare("SELECT due_date, task_stages from edu_user_task  where task_status=? and assigned_to=?")) {
+		
+	 $stmt->bind_param("ss", $param_task_status, $param_assigned_to);
+		 // Set parameters 
+	 $param_task_status = $active;
+     $param_assigned_to = $_SESSION['id'];
+	 
+	 $stmt->execute();
+		 /* bind variables to prepared statement */
+	 $stmt->bind_result($due_date, $task_stages);
+	 $sr =1; 
+	
+	 
+	 while ($stmt->fetch()) {
+	 $Y_date =date('Y', strtotime($due_date));
+	 $M_date =date('m', strtotime($due_date));
+	 $D_date =date('d', strtotime($due_date));
+	if($task_stages =="Incomplete"){ $taskColor = "yellow";}
+	else if($task_stages =="Completed"){ $taskColor = "green";}
+	 else if($task_stages =="Overdue"){ $taskColor = "orange";}
+	 ?>  
+	 var current_yyyymm_ = <?php echo $Y_date.$M_date;?>; 
+			temp_schedule_list_[current_yyyymm_+"<?php echo $D_date; ?>"] = [
+				{'ID' : <?php echo $sr; ?>, style : "<?php echo $taskColor;?>"}
+			];
+<?php  
+		 $sr++;
+	 }
+        	
+	}
+?>
+			/*temp_schedule_list_[current_yyyymm_+"10"] = [
+				{'ID' : 2, style : "orange"},
+				{'ID' : 3, style : "yellow"},
+			];
+
+			temp_schedule_list_[current_yyyymm_+"20"] = [
+				{'ID' : 4, style : "orange"},
+				{'ID' : 5, style : "yellow"},
+				{'ID' : 6, style : "green"},
+			];*/
+			callback_(temp_schedule_list_);
+		},
+		schedule_dot_item_render : function(dot_item_el_, schedule_data_){
+			dot_item_el_.addClass(schedule_data_['style'], true);
+			return dot_item_el_;
+		}
+	});
+});
+$(document).ready(function() {
+   $(window).on('load', function() {
+        var classInfo = 1;
+        $.ajax({
+          type: 'POST',
+          url: 'data/myClassesdash.php',
+          data: {
+            classInfo: classInfo
+          },
+          cache: false,
+          success: function(data) {
+            var html = '';
+            var size = 0;
+            $("#classinfo").html(data);
+          }
+        });
+   });
+   
+   $(window).on('load', function() {
+        var messageinfo = 1;
+        $.ajax({
+          type: 'POST',
+          url: 'data/myMessagedash.php',
+          data: {
+            messageinfo: messageinfo
+          },
+          cache: false,
+          success: function(data) {
+            var html = '';
+            var size = 0;
+            $("#messageinfo").html(data);
+          }
+        });
+   });
+});   
+</script>
 
     </body>
 </html>

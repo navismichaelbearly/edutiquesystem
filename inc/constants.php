@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Singapore');
 /*Constant PHP variables that will be used through out the application*/
 $active= "Active";
 $inactive= "Inactive";
@@ -8,6 +9,7 @@ $admconst = 5;
 $admstdconst = 3;
 $admtchconst = 2;
 $admprogtchconst = 4;
+$admindvconst = 6;
 $passwordStrengthtext = "Your password should have a minimum of 8 characters and at least 1 numeral, 1 capital letter, 1 lowercase letter and 1 Special Character.";
 $passwordText = "You may not reuse the same password for 3 consecutive times.";
 $forgotPasswordtextwithoutemail ="If you are registered under Username, then please contact Admin";
